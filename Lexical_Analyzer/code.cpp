@@ -8,72 +8,53 @@ vector <string> t_n, t_v;
 string temp;
 static int index;
 
-void isID(string st)
+void isID(string st, int& num)
 {
     string state = "T0";
-
-
-    for (int i = 0; i < (int)st.size(); i++)
+    if (st[num] == '_')
     {
-        if (state == "false") break;
-
-        if (state == "T0") // state가 T0인 상태
-        {
-            if (isalpha(st[i]) == 1 || isalpha(st[i]) == 2) // st[i]가 대문자이거나 소문자(알파벳)
-            {
-                state = "T2";
-                temp += st[i];
-            }
-            else if (st[i] == '_')
-            {
-                state = "T1";
-                temp += st[i];
-            }
-
-            else
-            {
-                state = "false";
-                
-            }
-        }
-
-        else // state가 T1, T2, T3, T4, T5인 상태
-        {
-            if (isalpha(st[i]) == 1 || isalpha(st[i]) == 2) // st[i]가 대문자이거나 소문자(알파벳)
-            {
-                state = "T4";
-                temp += st[i];
-            }
-
-            else if (st[i] == '_')
-            {
-                state = "T3";
-                temp += st[i];
-            }
-
-            else if (isdigit(st[i]) != 0) //st[i]가 숫자인 경우
-            {
-                state = "T5";
-                temp += st[i];
-            }
-
-            else {
-                state = "false";
-               
-            }
-
-        }
-        
-
+        state = "T1";
+        temp = st[num];
+        num++;
     }
-
-    if (state == "false" && !(temp.empty()==true))
+    else if (isalpha(st[num]) == 1 || isalpha(st[num]) == 2)
     {
-        t_n.push_back("ID");
-        t_v.push_back(temp);
+        state = "T2";
+        temp = st[num];
+        num++;
     }
-
-   
+    else
+    {
+        state = "false";
+    }
+    while (state != "false")
+    {
+        if (st[num] == '_')
+        {
+            state = "T3";
+            temp += st[num];
+            num++;
+        }
+        else if (isalpha(st[num]) == 1 || isalpha(st[num]) == 2)
+        {
+            state = "T4";
+            temp += st[num];
+            num++;
+        }
+        else if (isdigit(st[num]) != 0)
+        {
+            state = "T5";
+            temp += st[num];
+            num++;
+        }
+        else
+        {
+            state = "false";
+            t_n.push_back("ID");
+            t_v.push_back(temp);
+        }
+    }
+    
 
 }
 
@@ -197,11 +178,11 @@ void isCOMPARISON(string st)
 
 }
 
-void isINT(string st)
+void isINT(string st, int &num)
 {
     string state = "T0";
-    int i = 0;
-    if (st[i] == 'i' && st[i + 1] == 'n' && st[i + 2] == 't')
+    
+    if (st[num] == 'i' && st[num + 1] == 'n' && st[num + 2] == 't')
     {
         state = "T1";
     }
@@ -211,6 +192,7 @@ void isINT(string st)
     {
         t_n.push_back("INT");
         t_v.push_back(" ");
+        num += 3;
     }
 }
 
@@ -522,7 +504,138 @@ void isWHILE(string st)
         t_v.push_back(" ");
     }
 }
+
+void isCONDITION(string st)
+{
+    string state = "T0";
+    int i = 0;
+    if (st[i] == 'i' && st[i + 1] == 'f')
+    {
+        state = "T3";
+        temp = "if";
+    }
+    else if (st[i] == 'e' && st[i + 1] == 'l' && st[i + 2] == 's' && st[i + 3] == 'e')
+    {
+        state = "T6";
+        temp = "else";
+    }
+    else state = "false";
+
+    if (state == "T6" && st[i + 4] == ' ' && st[i + 5] == 'i' && st[i + 6] == 'f')
+    {
+        state = "T9";
+        temp += " if";
+    }
+
+    if (state == "T3" || state == "T6" || state == "T9")
+    {
+        t_n.push_back("CONDITION");
+        t_v.push_back(temp);
+    }
+
+}
+
+void isINTEGER(string st)
+{
+    string state = "T0";
+    int i = 0;
+
+    if (st[i] == '-')
+    {
+        state = "T1";
+        temp = '-';
+        i++;
+    }
+    if (isdigit(st[i]) != 0 && st[i] != '0')
+    {
+        state = "T2";
+        temp += st[i];
+        i++;
+    }
     
+    while (state == "T2" || state =="T3" && isdigit(st[i]) != 0)
+    {
+        temp += st[i];
+        i++;
+        state = "T3";
+    }
+   
+    if (state == "T2" || state == "T3")
+    {
+        t_n.push_back("INTEGER");
+        t_v.push_back(temp);
+    }
+
+}
+
+void isZERO(string st)
+{
+    string state = "T0";
+    int i = 0;
+    if (st[i] == '0')
+    {
+        state = "T1";
+    }
+    else state = "false";
+
+    if (state == "T1")
+    {
+        t_n.push_back("ZERO");
+        t_v.push_back(" ");
+    }
+}
+
+void isDOT(string st)
+{
+    string state = "T0";
+    int i = 0;
+    if (st[i] == '.')
+    {
+        state = "T1";
+    }
+    else state = "false";
+
+    if (state == "T1")
+    {
+        t_n.push_back("DOT");
+        t_v.push_back(" ");
+    }
+}
+
+void isWHITESPACE(string st, int &num)
+{
+    string state = "T0";
+    
+    if (st[num] == ' ')
+    {
+        state = "T1";
+    }
+    if (st[num] == '\\')
+    {
+        state = "T2";
+        num++;
+    }
+
+    if (state == "T2" && st[num] == 'n')
+    {
+        state = "T3";
+        temp = "\n";
+    }
+    else if (state == "T2" && st[num] == 't')
+    {
+        state = "T4";
+        temp = "\t";
+    }
+
+    if (state == "T1" || state == "T3" || state == "T4")
+    {
+        t_n.push_back("WHITESPACE");
+        t_v.push_back(temp);
+        num++;
+    }
+    else state = "false";
+
+}
 
     
 
@@ -564,14 +677,20 @@ void isWHILE(string st)
 
 int main() {
 
-    string str = "false";
+    int index = 0;
+    string str = "int a";
    
     //isID(str);
     //isCHARACTER(str);
-    isBOOLSTRING(str);
-    cout << t_n[0] << endl;
-    cout << t_v[0] << endl;
-   // cout << '\'' << endl;
+    isINT(str, index);
+    isWHITESPACE(str, index);
+    isID(str, index);
+    for (int j = 0; j < (int)t_n.size(); j++)
+    {
+        cout << t_n[j] << " " ;
+        cout << t_v[j] << endl;
+    }
+   cout << index << endl;
    
 
     return 0;
@@ -586,17 +705,14 @@ int main() {
     {
         while (!readFile.eof())
         {
-            //1. istream의 getline.
-
-            /*char tmp[256];
-            readFile.getline(tmp, 256);
-            cout << tmp << endl; */   //지금은 읽은 문자열 바로 출력.
+           
 
             //2. std::getline.
-          /*  string str;
-            getline(readFile, str);
-            isID(str);
-            cout << str << endl;   //지금은 읽은 문자열 바로 출력.
+            string str;
+            getline(readFile, str); //input파일에서 한 줄을 읽어와서 str에 저장
+
+            
+            cout << str << endl;  
 
 
 
