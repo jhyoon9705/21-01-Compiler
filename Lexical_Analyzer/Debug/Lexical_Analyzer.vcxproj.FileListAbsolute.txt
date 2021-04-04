@@ -1,0 +1,2 @@
+C:\Users\jhyoo\Desktop\Compiler-Project\Lexical_Analyzer\Debug\Lexical_Analyzer.exe
+C:\Users\jhyoo\Desktop\Compiler-Project\Lexical_Analyzer\Debug\Lexical_Analyzer.pdb
