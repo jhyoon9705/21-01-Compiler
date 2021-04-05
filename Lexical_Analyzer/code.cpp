@@ -52,44 +52,45 @@ void isID(string st, int& num)
             state = "false";
             t_n.push_back("ID");
             t_v.push_back(temp);
+            temp.clear();
         }
     }
     
 
 }
 
-void isCHARACTER(string st)
+void isCHARACTER(string st, int &num)
 {
     string state = "T0";
-    int i = 0;
-    if (st[i] == '\'')
+    if (st[num] == '\'')
     {
         state = "T1";
-        i++;
+        num++;
     }
+    else state = "false";
 
     if (state == "T1")
     {
-        if (isalpha(st[i]) == 1 || isalpha(st[i]) == 2)
+        if (isalpha(st[num]) == 1 || isalpha(st[num]) == 2)
         {
             state = "T2";
-            temp += st[i];
-            i++;
+            temp += st[num];
+            num++;
             
         }
 
-        else if (isdigit(st[i]) != 0)
+        else if (isdigit(st[num]) != 0)
         {
             state = "T3";
-            temp += st[i];
-            i++;
+            temp += st[num];
+            num++;
             
         }
 
-        else if (st[i] == ' ')
+        else if (st[num] == ' ')
         {
             state = "T4";
-            i++;
+            num++;
         }
 
         else {
@@ -98,84 +99,87 @@ void isCHARACTER(string st)
         }
     }
 
-    if (st[i] == '\'')
+    if (state!="false" && st[num] == '\'')
     {
         t_n.push_back("CHARACTER");
         t_v.push_back(temp);
+        temp.clear();
     }
-    else state = "false";
+    
 
    
 }
 
-void isLITERAL(string st)
+void isLITERAL(string st, int &num)
 {
     string state = "T0";
-    int i = 0;
-    if (st[i] == '\"')
+    if (st[num] == '\"')
     {
         state = "T1";
-        i++;
+        num++;
     }
     else state = "false";
 
-    while (state =="T1" || state == "T7" && st[i] != '\"')
+    while (state =="T1" || state == "T7" && st[num] != '\"')
     {
-        temp += st[i];
-        i++;
+        temp += st[num];
+        num++;
         state = "T7";
     }
-    if (st[i] == '\"')
+    if (state != "false" && st[num] == '\"')
     {
         t_n.push_back("LITERAL");
         t_v.push_back(temp);
+        num++;
+        temp.clear();
     }
 }
 
-void isCOMPARISON(string st)
+void isCOMPARISON(string st, int& num)
 {
     string state = "T0";
-    int i = 0;
-
-    if (st[i] == '<')
+    if (st[num] == '<')
     {
         state = "T1";
-        temp += st[i];
-        i++;
+        temp += st[num];
     }
-    else if (st[i] == '>')
+    else if (st[num] == '>')
     {
         state = "T2";
-        temp += st[i];
-        i++;
+        temp += st[num];
+        
     }
-    else if (st[i] == '!')
+    else if (st[num] == '!')
     {
         state = "T3";
-        temp += st[i];
-        i++;
+        temp += st[num];
+       
     }
-    else if (st[i] == '=')
+    else if (st[num] == '=')
     {
         state = "T4";
-        temp += st[i];
-        i++;
+        temp += st[num];
     }
     else state = "false";
 
-    if (st[i] == '=')
+    if ((state == "T1" || state == "T2" || state == "T3" || state == "T4") && st[num+1] == '=')
     {
         state = "T5";
-        temp += st[i];
+        temp += st[num];
+        num++;
     }
-
+    
     if (state == "T1" || state == "T2" || state == "T5")
     {
         t_n.push_back("COMPARISON");
         t_v.push_back(temp);
+        temp.clear();
+        num++;
     }
-
-
+    else if (state == "T4")
+    {
+        temp.clear();
+    }
 }
 
 void isINT(string st, int &num)
@@ -196,11 +200,10 @@ void isINT(string st, int &num)
     }
 }
 
-void isCHAR(string st)
+void isCHAR(string st, int &num)
 {
     string state = "T0";
-    int i = 0;
-    if (st[i] == 'c' && st[i + 1] == 'h' && st[i + 2] == 'a' && st[i+3] == 'r')
+    if (st[num + 0] == 'c' && st[num + 1] == 'h' && st[num + 2] == 'a' && st[num + 3] == 'r')
     {
         state = "T1";
     }
@@ -210,14 +213,14 @@ void isCHAR(string st)
     {
         t_n.push_back("CHAR");
         t_v.push_back(" ");
+        num += 4;
     }
 }
 
-void isBOOLEAN(string st)
+void isBOOLEAN(string st, int &num)
 {
     string state = "T0";
-    int i = 0;
-    if (st[i] == 'b' && st[i + 1] == 'o' && st[i + 2] == 'o' && st[i + 3] == 'l' && st[i+4]=='e' && st[i+5] == 'a' && st[i+6] == 'n')
+    if (st[num] == 'b' && st[num + 1] == 'o' && st[num + 2] == 'o' && st[num + 3] == 'l' && st[num + 4]=='e' && st[num + 5] == 'a' && st[num + 6] == 'n')
     {
         state = "T1";
     }
@@ -227,14 +230,14 @@ void isBOOLEAN(string st)
     {
         t_n.push_back("BOOLEAN");
         t_v.push_back(" ");
+        num += 7;
     }
 }
 
-void isSTRING(string st)
+void isSTRING(string st, int &num)
 {
     string state = "T0";
-    int i = 0;
-    if (st[i] == 's' && st[i + 1] == 't' && st[i + 2] == 'r' && st[i + 3] == 'i' && st[i+4]=='n' && st[i+5]=='g')
+    if (st[num] == 's' && st[num + 1] == 't' && st[num + 2] == 'r' && st[num + 3] == 'i' && st[num +4]=='n' && st[num + 5]=='g')
     {
         state = "T1";
     }
@@ -244,37 +247,39 @@ void isSTRING(string st)
     {
         t_n.push_back("STRING");
         t_v.push_back(" ");
+        num += 6;
     }
 }
 
-void isBOOLSTRING(string st)
+void isBOOLSTRING(string st, int &num)
 {
     string state = "T0";
-    int i = 0;
-    if (st[i] == 't' && st[i + 1] == 'r' && st[i + 2] == 'u' && st[i + 3] == 'e')
+    if (st[num] == 't' && st[num + 1] == 'r' && st[num + 2] == 'u' && st[num + 3] == 'e')
     {
         state = "T9";
         temp = "true";
+        num += 4;
     }
-    if (st[i] == 'f' && st[i + 1] == 'a' && st[i + 2] == 'l' && st[i + 3] == 's' && st[i + 4] == 'e')
+    if (st[num] == 'f' && st[num + 1] == 'a' && st[num + 2] == 'l' && st[num + 3] == 's' && st[num + 4] == 'e')
     {
         state = "T8";
         temp = "false";
+        num += 5;
     }
 
     if (state == "T8" || state == "T9")
     {
         t_n.push_back("BOOLSTRING");
         t_v.push_back(temp);
+        temp.clear();
     }
-    else state = "false";
+    
 }
 
-void isLPAREN(string st)
+void isLPAREN(string st, int &num)
 {
     string state = "T0";
-    int i = 0;
-    if (st[i] == '(')
+    if (st[num] == '(')
     {
         state = "T1";
     }
@@ -284,14 +289,14 @@ void isLPAREN(string st)
     {
         t_n.push_back("LPAREN");
         t_v.push_back(" ");
+        num++;
     }
 }
 
-void isRPAREN(string st)
+void isRPAREN(string st, int &num)
 {
     string state = "T0";
-    int i = 0;
-    if (st[i] == ')')
+    if (st[num] == ')')
     {
         state = "T1";
     }
@@ -301,14 +306,14 @@ void isRPAREN(string st)
     {
         t_n.push_back("RPAREN");
         t_v.push_back(" ");
+        num++;
     }
 }
 
-void isLBRACE(string st)
+void isLBRACE(string st, int &num)
 {
     string state = "T0";
-    int i = 0;
-    if (st[i] == '{')
+    if (st[num] == '{')
     {
         state = "T1";
     }
@@ -318,14 +323,14 @@ void isLBRACE(string st)
     {
         t_n.push_back("LBRACE");
         t_v.push_back(" ");
+        num++;
     }
 }
 
-void isRBRACE(string st)
+void isRBRACE(string st, int &num)
 {
     string state = "T0";
-    int i = 0;
-    if (st[i] == '}')
+    if (st[num] == '}')
     {
         state = "T1";
     }
@@ -335,14 +340,14 @@ void isRBRACE(string st)
     {
         t_n.push_back("RBRACE");
         t_v.push_back(" ");
+        num++;
     }
 }
 
-void isLBRACKET(string st)
+void isLBRACKET(string st, int &num)
 {
     string state = "T0";
-    int i = 0;
-    if (st[i] == '[')
+    if (st[num] == '[')
     {
         state = "T1";
     }
@@ -352,14 +357,14 @@ void isLBRACKET(string st)
     {
         t_n.push_back("LBRACKET");
         t_v.push_back(" ");
+        num++;
     }
 }
 
-void isRBRACKET(string st)
+void isRBRACKET(string st, int &num)
 {
     string state = "T0";
-    int i = 0;
-    if (st[i] == ']')
+    if (st[num] == ']')
     {
         state = "T1";
     }
@@ -369,14 +374,14 @@ void isRBRACKET(string st)
     {
         t_n.push_back("RBRACKET");
         t_v.push_back(" ");
+        num++;
     }
 }
 
-void isSEMI(string st)
+void isSEMI(string st, int &num)
 {
     string state = "T0";
-    int i = 0;
-    if (st[i] == ';')
+    if (st[num] == ';')
     {
         state = "T1";
     }
@@ -386,14 +391,14 @@ void isSEMI(string st)
     {
         t_n.push_back("SEMI");
         t_v.push_back(" ");
+        num++;
     }
 }
 
-void isCOMMA(string st)
+void isCOMMA(string st, int &num)
 {
     string state = "T0";
-    int i = 0;
-    if (st[i] == ',')
+    if (st[num] == ',')
     {
         state = "T1";
     }
@@ -403,62 +408,74 @@ void isCOMMA(string st)
     {
         t_n.push_back("COMMA");
         t_v.push_back(" ");
+        num++;
     }
 }
 
-void isASSIGN(string st)
+void isASSIGN(string st, int &num)
 {
     string state = "T0";
-    int i = 0;
-    if (st[i] == '=')
+    
+    if (st[num] == '=')
     {
         state = "T1";
     }
     else state = "false";
+
+    if (st[num + 1] == '=') // ==와 =를 구별
+    {
+        state = "false";
+    }
+    
 
     if (state == "T1")
     {
         t_n.push_back("ASSIGN");
         t_v.push_back(" ");
+        num++;
+        temp.clear();
     }
 }
 
-void isARITHOPERATOR(string st)
+void isARITHOPERATOR(string st, int &num)
 {
     string state = "T0";
-    int i = 0;
-    if (st[i] == '+')
+    if (st[num] == '+')
     {
         state = "T1";
-        
+        temp += "+";
     }
-    else if (st[i] == '-')
+    else if (st[num] == '-')
     {
         state = "T2";
+        temp += "-";
     }
-    else if (st[i] == '*')
+    else if (st[num] == '*')
     {
         state = "T3";
+        temp += "*";
     }
-    else if (st[i] == '/')
+    else if (st[num] == '/')
     {
         state = "T4";
+        temp += "/";
     }
     else state = "false";
 
     if (state == "T1" || state == "T2" || state == "T3" || state == "T4")
     {
-        temp = st[i];
+        temp = st[num];
         t_n.push_back("ARITHOPERATOR");
         t_v.push_back(temp);
+        temp.clear();
+        num++;
     }
 }
 
-void isCLASS(string st)
+void isCLASS(string st, int &num)
 {
     string state = "T0";
-    int i = 0;
-    if (st[i] == 'c' && st[i + 1] == 'l' && st[i + 2] == 'a' && st[i + 3] == 's' && st[i + 4] == 's')
+    if (st[num] == 'c' && st[num + 1] == 'l' && st[num + 2] == 'a' && st[num + 3] == 's' && st[num + 4] == 's')
     {
         state = "T1";
     }
@@ -468,14 +485,14 @@ void isCLASS(string st)
     {
         t_n.push_back("CLASS");
         t_v.push_back(" ");
+        num += 5;
     }
 }
 
-void isRETURN(string st)
+void isRETURN(string st, int &num)
 {
     string state = "T0";
-    int i = 0;
-    if (st[i] == 'r' && st[i + 1] == 'e' && st[i + 2] == 't' && st[i + 3] == 'u' && st[i + 4] == 'r' && st[i + 5] == 'n')
+    if (st[num] == 'r' && st[num + 1] == 'e' && st[num + 2] == 't' && st[num + 3] == 'u' && st[num + 4] == 'r' && st[num + 5] == 'n')
     {
         state = "T1";
     }
@@ -485,14 +502,14 @@ void isRETURN(string st)
     {
         t_n.push_back("RETURN");
         t_v.push_back(" ");
+        num += 6;
     }
 }
 
-void isWHILE(string st)
+void isWHILE(string st, int &num)
 {
     string state = "T0";
-    int i = 0;
-    if (st[i] == 'w' && st[i + 1] == 'h' && st[i + 2] == 'i' && st[i + 3] == 'l' && st[i + 4] == 'e')
+    if (st[num] == 'w' && st[num + 1] == 'h' && st[num + 2] == 'i' && st[num + 3] == 'l' && st[num + 4] == 'e')
     {
         state = "T1";
     }
@@ -502,94 +519,87 @@ void isWHILE(string st)
     {
         t_n.push_back("WHILE");
         t_v.push_back(" ");
+        num += 5;
     }
 }
 
-void isCONDITION(string st)
+void isCONDITION(string st, int &num)
 {
     string state = "T0";
-    int i = 0;
-    if (st[i] == 'i' && st[i + 1] == 'f')
+    if (st[num] == 'i' && st[num + 1] == 'f' && st[num+2] == ' ') //if
     {
         state = "T3";
         temp = "if";
+        num += 2;
     }
-    else if (st[i] == 'e' && st[i + 1] == 'l' && st[i + 2] == 's' && st[i + 3] == 'e')
+    else if (st[num] == 'e' && st[num + 1] == 'l' && st[num + 2] == 's' && st[num + 3] == 'e') //else
     {
         state = "T6";
         temp = "else";
+        if (st[num + 4] == ' ' && st[num + 5] == 'i' && st[num + 6] == 'f') //else if
+        {
+            state = "T9";
+            temp += " if";
+            num += 7;
+        }
+        else num += 4;
     }
     else state = "false";
-
-    if (state == "T6" && st[i + 4] == ' ' && st[i + 5] == 'i' && st[i + 6] == 'f')
-    {
-        state = "T9";
-        temp += " if";
-    }
 
     if (state == "T3" || state == "T6" || state == "T9")
     {
         t_n.push_back("CONDITION");
         t_v.push_back(temp);
+        temp.clear();
     }
 
 }
 
-void isINTEGER(string st)
+void isINTEGER(string st, int &num)
 {
     string state = "T0";
-    int i = 0;
-
-    if (st[i] == '-')
+   
+    if (st[num] == '-')
     {
         state = "T1";
         temp = '-';
-        i++;
+        num++;
     }
-    if (isdigit(st[i]) != 0 && st[i] != '0')
+    if (isdigit(st[num]) != 0 && st[num] != '0')
     {
         state = "T2";
-        temp += st[i];
-        i++;
+        temp += st[num];
+        num++;
     }
     
-    while (state == "T2" || state =="T3" && isdigit(st[i]) != 0)
+    while (state == "T2" && isdigit(st[num]) != 0)
     {
-        temp += st[i];
-        i++;
-        state = "T3";
+        temp += st[num];
+        num++;
+        state = "T2";
     }
    
-    if (state == "T2" || state == "T3")
+    if (state == "T2")
     {
         t_n.push_back("INTEGER");
         t_v.push_back(temp);
+        temp.clear();
+        
+    }
+
+    if (st[num] == '0') // 0인 경우 따로 취급
+    {
+        t_n.push_back("INTEGER");
+        t_v.push_back("0");
+        num++;
     }
 
 }
 
-void isZERO(string st)
+void isDOT(string st, int &num)
 {
     string state = "T0";
-    int i = 0;
-    if (st[i] == '0')
-    {
-        state = "T1";
-    }
-    else state = "false";
-
-    if (state == "T1")
-    {
-        t_n.push_back("ZERO");
-        t_v.push_back(" ");
-    }
-}
-
-void isDOT(string st)
-{
-    string state = "T0";
-    int i = 0;
-    if (st[i] == '.')
+    if (st[num] == '.')
     {
         state = "T1";
     }
@@ -599,6 +609,7 @@ void isDOT(string st)
     {
         t_n.push_back("DOT");
         t_v.push_back(" ");
+        num++;
     }
 }
 
@@ -610,7 +621,7 @@ void isWHITESPACE(string st, int &num)
     {
         state = "T1";
     }
-    if (st[num] == '\\')
+    else if (st[num] == '\\')
     {
         state = "T2";
         num++;
@@ -627,76 +638,88 @@ void isWHITESPACE(string st, int &num)
         temp = "\t";
     }
 
-    if (state == "T1" || state == "T3" || state == "T4")
+    if (state == "T3" || state == "T4")
     {
         t_n.push_back("WHITESPACE");
         t_v.push_back(temp);
+        temp.clear();
+        num += 2;
+    }
+    else if (state == "T1")
+    {
+        t_n.push_back("WHITESPACE");
+        t_v.push_back(" ");
         num++;
     }
-    else state = "false";
-
-}
-
     
 
-    /*if (isalpha(st[i]) == 1 || isalpha(st[i]) == 2)
+}
+//수정 필요
+
+void classify(string st)
+{
+    
+    while (index < (int) st.size())
     {
-        state = "T2";
-        temp += st[i];
-        i++;
+        
+        isCOMPARISON(st, index);
+        isASSIGN(st, index);
+        isLPAREN(st, index);
+        isRPAREN(st, index);
+        isLBRACE(st, index);
+        isRBRACE(st, index);
+        isLBRACKET(st, index);
+        isRBRACKET(st, index);
+        isDOT(st, index);
+        isWHILE(st, index);
+        isCLASS(st, index);
+        isRETURN(st, index);
+        isCONDITION(st, index);
+        isSEMI(st, index);
+        isCOMMA(st, index);
+        isCHARACTER(st, index);
+        isLITERAL(st, index);
+        isINT(st, index);
+        isCHAR(st, index);
+        isBOOLEAN(st, index);
+        isBOOLSTRING(st, index);
+        isSTRING(st, index);
+        isID(st, index);
+        isARITHOPERATOR(st, index);
+        isINTEGER(st, index);
+        isWHITESPACE(st, index);
     }
-    else if (isdigit(st[i]) != 0)
-    {
-        state = "T3";
-        temp += st[i];
-        i++;
-    }
-    else if (st[i] == ' ')
-    {
-        state = "T4";
-        temp += st[i];
-        i++;
-    }
-    else {
-        state = "false";
-    }
+}
+    
+/*int main() {
 
-    for (i; i < (int)st.size(); i++)
-    {
-        if (isalpha(st[i]) == 1 || isalpha(st[i]) == 2)
-        {
-            state = "T5";
-
-        }
-
-    }*/
-
-
-
-
-
-int main() {
-
-    int index = 0;
-    string str = "int a";
+    index = 0;
+    string str = "int main(){char if123='1';int 0a=a+-1;return -0;}";
+    classify(str);
    
     //isID(str);
     //isCHARACTER(str);
-    isINT(str, index);
-    isWHITESPACE(str, index);
-    isID(str, index);
+    
     for (int j = 0; j < (int)t_n.size(); j++)
     {
-        cout << t_n[j] << " " ;
-        cout << t_v[j] << endl;
+        if (t_n[j] == "WHITESPACE") j++;
+
+        cout << "<";
+        cout << t_n[j];
+        if (t_v[j] != " ")
+        {
+            cout << ", ";
+            cout << t_v[j];
+        }
+        cout << ">" << endl;
     }
-   cout << index << endl;
+   
    
 
     return 0;
-}
+}*/
 
-/*int main()
+int main()
 {
     ifstream readFile;
     readFile.open("input.txt");    //파일 열기
@@ -705,20 +728,30 @@ int main() {
     {
         while (!readFile.eof())
         {
-           
+             string str;
+             index = 0; //index 초기화 
+             getline(readFile, str); //input파일에서 한 줄을 읽어와서 str에 저장
+             classify(str);
+             for (int j = 0; j < (int)t_n.size(); j++)
+             {
+                 while (t_n[j] == "WHITESPACE") j++;
 
-            //2. std::getline.
-            string str;
-            getline(readFile, str); //input파일에서 한 줄을 읽어와서 str에 저장
-
+                 cout << "<";
+                 cout << t_n[j];
+                 if (t_v[j] != " ")
+                 {
+                     cout << ", ";
+                     cout << t_v[j];
+                 }
+                 cout << ">" << endl;
+             }
+             t_v.clear();
+             t_n.clear();
             
-            cout << str << endl;  
-
-
-
+             
         }
         readFile.close();    //파일 닫아줍니다.
     }
     return 0;
 
-}*/
+}
