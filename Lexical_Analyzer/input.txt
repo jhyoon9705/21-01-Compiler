@@ -13,4 +13,5 @@ else {
 System.out.println("Less than 100");
 }
 }
+return 0;
 }

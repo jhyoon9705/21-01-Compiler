@@ -4,9 +4,10 @@
 #include <cctype>
 #include <vector>
 using namespace std;
-vector <string> t_n, t_v;
-string temp;
+vector <string> t_n, t_v; //t_n에는 token name을, t_v에는 token value를 저장
+string temp; //token value를 임시로 저장하기 위한 string
 static int index;
+int stringNum = 0;
 
 void isID(string st, int& num)
 {
@@ -17,7 +18,7 @@ void isID(string st, int& num)
         temp = st[num];
         num++;
     }
-    else if (isalpha(st[num]) == 1 || isalpha(st[num]) == 2)
+    else if (isalpha(st[num]) == 1 || isalpha(st[num]) == 2) //letter인 경우
     {
         state = "T2";
         temp = st[num];
@@ -35,7 +36,7 @@ void isID(string st, int& num)
             temp += st[num];
             num++;
         }
-        else if (isalpha(st[num]) == 1 || isalpha(st[num]) == 2)
+        else if (isalpha(st[num]) == 1 || isalpha(st[num]) == 2) //digit인 경우
         {
             state = "T4";
             temp += st[num];
@@ -526,7 +527,7 @@ void isWHILE(string st, int &num)
 void isCONDITION(string st, int &num)
 {
     string state = "T0";
-    if (st[num] == 'i' && st[num + 1] == 'f' && st[num+2] == ' ') //if
+    if (st[num] == 'i' && st[num + 1] == 'f' && !(isalpha(st[num+2]) == 1 || isalpha(st[num+2]) == 2) && !(isdigit(st[num+2]) != 0)) //if (if 바로 뒤에 숫자나 알파벳이 오지 않는 경우)
     {
         state = "T3";
         temp = "if";
@@ -559,11 +560,13 @@ void isINTEGER(string st, int &num)
 {
     string state = "T0";
    
-    if (st[num] == '-')
+    if (st[num] == '-') 
     {
-        state = "T1";
-        temp = '-';
-        num++;
+
+            state = "T1";
+            temp = '-';
+            num++;
+       
     }
     if (isdigit(st[num]) != 0 && st[num] != '0')
     {
@@ -654,14 +657,15 @@ void isWHITESPACE(string st, int &num)
     
 
 }
-//수정 필요
 
-void classify(string st)
+
+void classify(string st) //토큰별로 구분해내기 위해 토큰 함수를 모두 하나씩 호출하여 검사
 {
-    
-    while (index < (int) st.size())
+    int checker=0;
+    while (index < (int) st.size()) //input 파일로부터 읽어온 한 줄이 끝날 때까지 반복
+    // 각 함수들이 끝났을 때, 해당 token으로 인식되면 인식된 token 다음 부분으로 index가 이동하고 계속 진행
     {
-        
+        checker = index;
         isCOMPARISON(st, index);
         isASSIGN(st, index);
         isLPAREN(st, index);
@@ -684,74 +688,83 @@ void classify(string st)
         isBOOLEAN(st, index);
         isBOOLSTRING(st, index);
         isSTRING(st, index);
-        isID(st, index);
         isARITHOPERATOR(st, index);
         isINTEGER(st, index);
         isWHITESPACE(st, index);
+
+        if(checker == index) //ID는 위의 token들에 모두 속하지 않을 경우 분류->Identifier인지는 다른 것들에 모두 해당 안되는 경우만 확인
+        isID(st, index);
+
+        if (checker == index) //ID를 거치고도 index값이 변하지 않는다는 것은 그 어떤 토큰에도 속하지 않는다는 것을 의미-> 에러 발생
+            throw stringNum;
+        
     }
 }
     
-/*int main() {
-
-    index = 0;
-    string str = "int main(){char if123='1';int 0a=a+-1;return -0;}";
-    classify(str);
-   
-    //isID(str);
-    //isCHARACTER(str);
-    
-    for (int j = 0; j < (int)t_n.size(); j++)
-    {
-        if (t_n[j] == "WHITESPACE") j++;
-
-        cout << "<";
-        cout << t_n[j];
-        if (t_v[j] != " ")
-        {
-            cout << ", ";
-            cout << t_v[j];
-        }
-        cout << ">" << endl;
-    }
-   
-   
-
-    return 0;
-}*/
 
 int main()
 {
-    ifstream readFile;
-    readFile.open("input.txt");    //파일 열기
+    ifstream inFile;
+    ofstream outFile;
+    string str;
+    string startText, inputFileName;
 
-    if (readFile.is_open())
+    cin >> startText >> inputFileName;
+    if (startText == "lexical_analyzer") // 입력이 lexical_analyzer inputfilename 형태일 경우만 lexical analyzer 실행
     {
-        while (!readFile.eof())
-        {
-             string str;
-             index = 0; //index 초기화 
-             getline(readFile, str); //input파일에서 한 줄을 읽어와서 str에 저장
-             classify(str);
-             for (int j = 0; j < (int)t_n.size(); j++)
-             {
-                 while (t_n[j] == "WHITESPACE") j++;
-
-                 cout << "<";
-                 cout << t_n[j];
-                 if (t_v[j] != " ")
-                 {
-                     cout << ", ";
-                     cout << t_v[j];
-                 }
-                 cout << ">" << endl;
-             }
-             t_v.clear();
-             t_n.clear();
-            
-             
-        }
-        readFile.close();    //파일 닫아줍니다.
+        inFile.open(inputFileName);
+        outFile.open(inputFileName+ "_output.txt");
     }
+    else //lexical_analyzer를 제대로 입력하지 않은 경우 종료
+    {
+        cout << "<ERROR>: Input should start with \"lexical_analyzer\"" << endl; 
+        return 0;
+    }
+
+        if (inFile.is_open())
+        {
+            while (!inFile.eof())
+            {
+                index = 0; //index 초기화, index는 input file에서 불러온 한 줄에서 lexical analyzer에 의해 분류 완료된 지점을 가리킴
+                getline(inFile, str); //input파일에서 한 줄을 읽어와서 str에 저장
+                stringNum++; //현재 읽어온 줄 번호, error report시에 사용
+
+                try { classify(str); } //str을 토큰 별로 분류 시작
+                catch (int stringNum) //어떤 토큰에도 속하지 않는 에러가 발생할 시, 에러가 발생한 줄 번호를 받음
+                {
+                    cout << "<ERROR>: Line " << stringNum << endl;
+                    goto FILECLOSE;
+                }
+                
+                for (int j = 0; j < (int)t_n.size(); j++) //출력부
+                {
+                    while (t_n[j] == "WHITESPACE") j++; //WHITESPACE는 symbol table에 포함시키지 않음
+
+                    outFile << "<";
+                    outFile << t_n[j];
+                    if (t_v[j] != " ")
+                    {
+                        outFile << ", ";
+                        outFile << t_v[j];
+                    }
+                    outFile << ">" << endl;
+                }
+                t_v.clear();
+                t_n.clear();
+            }
+            cout << "Finished!" << endl;
+
+            FILECLOSE:
+            inFile.close();
+            outFile.close();
+        }
+        else //input 파일을 열 수 없을 경우 종료
+        {
+            cout << "<ERROR>: Cannot open an input file." << endl;
+            outFile.close();
+        }
+        
+    
     return 0;
 
 }
